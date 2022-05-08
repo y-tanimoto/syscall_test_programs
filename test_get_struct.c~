@@ -1,0 +1,17 @@
+#include <stdio.h>
+#include <unistd.h>
+
+typedef struct {
+  int a;
+  int b;
+} my_struct;
+
+int main() {
+  my_struct s;
+  s.a = 123;
+  s.b = 456;
+
+  syscall(454, &s);
+
+  return 0;
+}

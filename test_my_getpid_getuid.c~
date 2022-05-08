@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+  int pid = syscall(456);  // my_getpid
+  int uid = syscall(457);  // my_getuid
+
+  printf("pid = %d uid = %d\n", pid, uid);
+
+  return 0;
+}
