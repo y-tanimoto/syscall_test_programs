@@ -35,6 +35,25 @@ int sb_semop(int sem_id, int op) {
   return 0;
 }
 
+int child(int sem_id) {
+  // セマフォのアンロックを待機
+  sb_semop(sem_id, LOCK);
+  printf("pid %d: child process start.\n", getpid());
+    
+  // syscall451: 実効不可
+  int a = 10, b;
+  b = syscall(451);
+  printf("syscall-451 returned %d\n", b);
+
+  // syscall452: 実行可能
+  b = syscall(452);
+  printf("syscall-452 returned %d\n", b);
+
+  // syscall453: 実効可能
+  b = syscall(453, &a);
+  printf("syscall-452 returned %d\n", b);
+}
+
 int main() {
   int ppid = getpid();
 
@@ -44,7 +63,6 @@ int main() {
     perror("semget");
     return 1;
   }
-
   if (sb_sem_init(sem_id) < 0) {
     perror("sb_sem_init");
     return 1;
@@ -55,22 +73,38 @@ int main() {
 
   // 子プロセス側の処理
   if (pid == 0) {
-    // セマフォのアンロックを待機
-    sb_semop(sem_id, LOCK);
-    printf("child process start.\n");
-    
-    // syscall451: 実効不可
-    int a = 10, b;
-    b = syscall(451);
-    printf("syscall-451 returned %d\n", b);
+    child(sem_id);
 
-    // syscall452: 実行可能
-    b = syscall(452);
-    printf("syscall-452 returned %d\n", b);
+    // セマフォを用意
+    int sem_id2 = semget(IPC_PRIVATE, 1, 0600);
+    if (sem_id2 < 0) {
+      perror("semget");
+      return 1;
+    }
+    if (sb_sem_init(sem_id2) < 0) {
+      perror("sb_sem_init");
+      return 1;
+    }
 
-    // syscall453: 実効可能
-    b = syscall(453, &a);
-    printf("syscall-452 returned %d\n", b);
+    // 子プロセスを生成
+    int pid2 = fork();
+    if (pid2 == 0) {
+      child(sem_id2);
+      return 0;
+    }
+
+    printf("ppid=%d, pid=%d\n", pid, pid);
+    // セマフォをアンロック（子プロセスの処理が始まる）
+    printf("parent process finish.\n");
+    sb_semop(sem_id2, UNLOCK);
+
+    wait(NULL);
+
+    // セマフォを解放
+    if (semctl(sem_id2, 0, IPC_RMID, ctl_arg) < 0) {
+      perror("semctl");
+      return 1;
+    }
     
     return 0;
   }
