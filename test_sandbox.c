@@ -34,6 +34,7 @@ int main() {
     printf("exists: %d\n", a);
 
     // Syscall2を許可
+    /*
     a = syscall(460, pid, 2, 1);
     printf("set syscall-2 to allow: %d\n", a);
 
@@ -47,7 +48,7 @@ int main() {
 
     // サンドボックスに入っているかかチェック
     a = syscall(462, pid);
-    printf("exists: %d\n", a);
+    printf("exists: %d\n", a);*/
 
     wait(NULL);
   }
