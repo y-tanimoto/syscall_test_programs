@@ -6,7 +6,13 @@ int main() {
   int pid = fork();
 
   if (pid == 0) {
-    sleep(10);
+    sleep(3);
+
+    // syscall-451を実行
+    int b = -1;
+    b = syscall(451);
+    printf("syscall-451 returned %d\n", b);
+    
     return 0;
   }
   else {
@@ -18,9 +24,9 @@ int main() {
     printf("register: %d\n", a);
 
     // Syscall1と2を禁止
-    a = syscall(460, pid, 1, 0);
+    a = syscall(460, pid, 451, 0);
     printf("set syscall-1 to forbidden: %d\n", a);
-    a = syscall(460, pid, 2, 0);
+    a = syscall(460, pid, 452, 0);
     printf("set syscall-2 to forbidden: %d\n", a);
 
     // サンドボックスに入っているかチェック＆禁止リストをログに表示

@@ -25,6 +25,7 @@ int main() {
   printf("ppid=%d, pid=%d: set_simple_proc returned %d.\n", ppid, pid, a);
   a =  (struct simple_proc_struct*)syscall(465, pid, usp);                          // search_simple_proc
   printf("ppid=%d, pid=%d: search_simple_proc returned %d.\n", ppid, pid, a);
+  printf("usp: %p\n", usp);
   if (usp != NULL)
     printf("child proc 1 profile:\npid=%d\nppid=%d\ncmd=%s\n", usp->pid, usp->ppid, usp->cmd);
 
